@@ -10,6 +10,7 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 @onready var animation_player = $female/AnimationPlayer
 @onready var visuals = $female
+@export var camera : Node3D
 
 var walking = false
 
@@ -31,7 +32,7 @@ func _physics_process(delta):
 	# Get the input direction and handle the movement/deceleration.
 	# As good practice, you should replace UI actions with custom gameplay actions.
 	var input_dir = Input.get_vector("left", "right", "forward", "back")
-	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	var direction = (camera.transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	if direction:
 		velocity.x = lerp(velocity.x, direction.x * SPEED, 0.1)
 		velocity.z = lerp(velocity.z, direction.z * SPEED, 0.1)
