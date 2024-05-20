@@ -10,7 +10,7 @@ extends Control
 func _process(_delta: float) -> void:
 	var screen_size := Vector2(get_window().size)
 	# viewport size minus padding
-	var game_size := Vector2(viewport.size - Vector2i(2, 2))
+	var game_size := Vector2(viewport.size - Vector2i(4, 2))
 	var display_scale := screen_size / game_size
 	# maintain aspect ratio
 	var display_scale_min: float = minf(display_scale.x, display_scale.y)
