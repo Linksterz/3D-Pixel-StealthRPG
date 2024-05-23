@@ -8,16 +8,16 @@ const JUMP_VELOCITY = 0.0
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 
-@onready var animation_player = $female/AnimationPlayer
-@onready var visuals = $female
+@onready var animation_player = $visuals/female/AnimationPlayer
+@onready var visuals = $visuals
 @export var camera : Node3D
 
 var walking = false
 
 func _ready():
 	#GameManager.set_player(self)
-	animation_player.set_blend_time("Idle","walk",0.2)
-	animation_player.set_blend_time("walk","Idle",1.0)
+	animation_player.set_blend_time("idle","walk",0.2)
+	animation_player.set_blend_time("walk","idle",1.0)
 	
 
 func _physics_process(delta):
@@ -37,7 +37,7 @@ func _physics_process(delta):
 		velocity.x = lerp(velocity.x, direction.x * SPEED, 0.1)
 		velocity.z = lerp(velocity.z, direction.z * SPEED, 0.1)
 		
-		var rotation_speed := 20.0
+		var rotation_speed := 10.0
 		var weight := 1.0 - pow(0.5, delta * rotation_speed)
 		visuals.rotation.y = lerp_angle(visuals.rotation.y, atan2(-direction.x, -direction.z), weight)
 		
@@ -55,6 +55,6 @@ func _physics_process(delta):
 		
 		if walking:
 			walking = false
-			animation_player.play("Idle")
+			animation_player.play("idle")
 
 	move_and_slide()
