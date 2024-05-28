@@ -1,16 +1,18 @@
 extends Node3D
 
 @export var player:CharacterBody3D
-#@onready var camera_3d = $Camera3D
-
-#@export var stage_dimentions:Vector2
+@export_range(0, 50) var orbit_speed: float = 4.0
+var _target_orbit := rotation.y
 
 func _process(delta):
 	position = lerp(position,player.position,delta*10.0)
-	#position.x = clampf(position.x,-stage_dimentions.x/2,stage_dimentions.x/2)
-	#position.z = clampf(position.z,-stage_dimentions.y/2,stage_dimentions.y/2)
 	
-	#camera_3d.look_at(((player.position+position)/2)+Vector3.UP,Vector3.UP)
-#
-	#$MeshInstance3D2.global_position = ((player.position+position)/2)+Vector3.UP
-	
+	if Input.is_action_just_pressed("cam_orbit_right"):
+		_target_orbit += TAU/8
+	if Input.is_action_just_pressed("cam_orbit_left"):
+		_target_orbit -= TAU/8
+	rotation.y = lerpf(rotation.y, _target_orbit, 1.0 - 2.0 ** (-4.0 * delta * orbit_speed))
+	if absf(rotation.y - _target_orbit) < 0.02:
+		rotation.y = _target_orbit
+		
+	print(rad_to_deg(rotation.y))
