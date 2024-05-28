@@ -18,17 +18,7 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 @export var camera_rig : Node3D
 @export var camera : Node3D
 
-var walking = false
-var running = false
 
-#func _ready():
-	#animation_player.set_blend_time("idle","walk",0.2)
-	#animation_player.set_blend_time("walk","idle",1.0)
-	#animation_player.set_blend_time("walk","slow_run",0.5)
-	#animation_player.set_blend_time("slow_run","walk",0.5)
-	#animation_player.set_blend_time("slow_run","idle",1.0)
-	#animation_player.set_blend_time("idle","slow_run",0.2)
-	
 
 func _physics_process(delta):
 	# Add the gravity.
@@ -60,50 +50,53 @@ func _physics_process(delta):
 			velocity.x = lerp(velocity.x, walk_direction.x * AIM_SPEED_MOD * SPEED, 0.1)
 			velocity.z = lerp(velocity.z, walk_direction.z * AIM_SPEED_MOD * SPEED, 0.1)
 			
-			#animation_player.speed_scale = AIM_SPEED_MOD
 			#animation_tree.set(movement_blend_path,Vector2(input_vector.x,input_vector.z))
 			
 		else:
 			if Input.is_action_pressed("run"):
 				velocity.x = lerp(velocity.x, walk_direction.x * RUN_SPEED, 0.1)
 				velocity.z = lerp(velocity.z, walk_direction.z * RUN_SPEED, 0.1)
-				#if !running:
-					#running = true
-					#walking = false
-					#animation_player.play("slow_run")
+
 			else:
 				velocity.x = lerp(velocity.x, walk_direction.x * SPEED, 0.1)
 				velocity.z = lerp(velocity.z, walk_direction.z * SPEED, 0.1)
-				#if !walking:
-					#walking = true
-					#running = false
-					#animation_player.play("walk")
-			#
+
 			var rotation_speed := 10.0
 			var weight := 1.0 - pow(0.5, delta * rotation_speed)
 			visuals.rotation.y = lerp_angle(visuals.rotation.y, atan2(-walk_direction.x, -walk_direction.z), weight)
 		
-			#animation_player.speed_scale = 1
-			state_machine.next()
-			state_machine.travel("movement_blend")
+
 				
 	else:
-		#velocity.x = move_toward(velocity.x, 0, SPEED)
-		#velocity.z = move_toward(velocity.z, 0, SPEED)
-		velocity.x = lerp(velocity.x, walk_direction.x * SPEED, 0.06)
-		velocity.z = lerp(velocity.z, walk_direction.z * SPEED, 0.06)
+		velocity.x = lerp(velocity.x, walk_direction.x * SPEED, 0.1)
+		velocity.z = lerp(velocity.z, walk_direction.z * SPEED, 0.1)
 		
-		state_machine.travel("idle")
-		#if walking:
-			#walking = false
-			#animation_player.play("idle")
-			#
-		#if running:
-			#running = false
-			#animation_player.play("idle")
-
 	move_and_slide()
 
+#@onready var state = 0
 func _process(delta):
+	#if Input.is_action_just_pressed("crouch"):
+		#if state != 1:
+			#state = 1
+			#state_machine.travel("crouch_down")
+		#else:
+			#state = 0
+			#state_machine.travel("idle")
+		
 	if Input.is_action_pressed("aim"):
 		state_machine.travel("aim_walk")
+		#state = 0
+		
+	else:
+		if Input.is_action_pressed("movement"):
+			if Input.is_action_pressed("run"):
+				state_machine.travel("slow_run")
+				#state = 0
+			#if state == 1:
+				#state_machine.travel("crouch_walk")
+			else:
+				state_machine.travel("walk")
+		#if state == 1:
+			#state_machine.travel("crouch_idle")
+		else:
+			state_machine.travel("idle")
