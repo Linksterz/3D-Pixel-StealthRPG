@@ -1,5 +1,6 @@
-[gd_scene load_steps=22 format=3 uid="uid://ci6hsk3tl8qw6"]
+[gd_scene load_steps=25 format=3 uid="uid://ci6hsk3tl8qw6"]
 
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_bqvkc"]
 [ext_resource type="Material" uid="uid://cpfv4dtvrm85w" path="res://assets/materials/floor_mat.tres" id="1_ebtfw"]
 [ext_resource type="Material" uid="uid://bcaksjnqmlidl" path="res://assets/materials/wall_mat.tres" id="2_x3icv"]
 [ext_resource type="PackedScene" uid="uid://wu130723yj4r" path="res://scenes/player/player.tscn" id="3_b20om"]
@@ -7,22 +8,11 @@
 [ext_resource type="Script" path="res://scripts/player/headlight_togle.gd" id="4_8vwj6"]
 [ext_resource type="Script" path="res://scripts/camera_3d_texel_snapped3.gd" id="4_cgcpi"]
 [ext_resource type="Shader" path="res://assets/shaders/pixelart_stylizer.gdshader" id="4_oux1c"]
+[ext_resource type="Script" path="res://scripts/wall_toggle_visibility.gd" id="4_vwwop"]
 [ext_resource type="Shader" path="res://assets/shaders/pixel_art_upscale.gdshader" id="5_ybrq6"]
 [ext_resource type="Script" path="res://scripts/display2.gd" id="6_7ti74"]
 [ext_resource type="FontFile" uid="uid://cshtjebbbu45b" path="res://assets/fonts/ark-pixel-12px-monospaced-zh_cn.otf" id="9_pgmli"]
-
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_13x8q"]
-sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
-ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
-
-[sub_resource type="Sky" id="Sky_n1bhg"]
-sky_material = SubResource("ProceduralSkyMaterial_13x8q")
-
-[sub_resource type="Environment" id="Environment_n8rq2"]
-background_mode = 1
-sky = SubResource("Sky_n1bhg")
-tonemap_mode = 2
-glow_enabled = true
+[ext_resource type="PackedScene" uid="uid://bcfdhv8ugcb24" path="res://scenes/wallhide.tscn" id="13_qhwyf"]
 
 [sub_resource type="Animation" id="Animation_wjea1"]
 length = 0.001
@@ -62,6 +52,21 @@ _data = {
 "flicker": SubResource("Animation_2devf")
 }
 
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_13x8q"]
+sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+
+[sub_resource type="Sky" id="Sky_n1bhg"]
+sky_material = SubResource("ProceduralSkyMaterial_13x8q")
+
+[sub_resource type="Environment" id="Environment_n8rq2"]
+background_mode = 1
+background_color = Color(0.898039, 0, 0, 1)
+background_energy_multiplier = 0.0
+sky = SubResource("Sky_n1bhg")
+tonemap_mode = 2
+glow_enabled = true
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_vaet3"]
 render_priority = 0
 shader = ExtResource("4_oux1c")
@@ -74,7 +79,13 @@ shader_parameter/shadow_color = Color(0, 0, 0, 1)
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_lkgup"]
 material = SubResource("ShaderMaterial_vaet3")
-size = Vector2(10, 8)
+size = Vector2(20, 16)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sdyh0"]
+shader = ExtResource("5_ybrq6")
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_72lo0"]
+viewport_path = NodePath("SubViewport")
 
 [sub_resource type="LabelSettings" id="LabelSettings_lllcc"]
 font = ExtResource("9_pgmli")
@@ -83,25 +94,17 @@ font_color = Color(1, 1, 1, 0.772549)
 outline_size = 4
 outline_color = Color(0, 0, 0, 1)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_sdyh0"]
-shader = ExtResource("5_ybrq6")
-
-[sub_resource type="ViewportTexture" id="ViewportTexture_72lo0"]
-viewport_path = NodePath("SubViewport")
-
 [node name="world" type="Node3D"]
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_n8rq2")
+script = ExtResource("1_bqvkc")
 
 [node name="map" type="Node3D" parent="."]
 
-[node name="wall&floor" type="Node" parent="map"]
+[node name="wall&floor" type="Node3D" parent="map"]
 
 [node name="floor" type="CSGBox3D" parent="map/wall&floor"]
-material_override = ExtResource("1_ebtfw")
 use_collision = true
 size = Vector3(10, 1, 10)
+material = ExtResource("1_ebtfw")
 
 [node name="floor4" type="CSGBox3D" parent="map/wall&floor"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, -18)
@@ -121,90 +124,101 @@ material_override = ExtResource("1_ebtfw")
 use_collision = true
 size = Vector3(9, 1, 2)
 
-[node name="wall1" type="CSGBox3D" parent="map/wall&floor"]
+[node name="EastWall" type="Node3D" parent="map/wall&floor" groups=["east_wall"]]
+script = ExtResource("4_vwwop")
+
+[node name="wall1" type="CSGBox3D" parent="map/wall&floor/EastWall"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.5, 1.5, 0)
-visible = false
-layers = 2
 material_override = ExtResource("2_x3icv")
 use_collision = true
 size = Vector3(1, 4, 10)
 
-[node name="wall2" type="CSGBox3D" parent="map/wall&floor"]
+[node name="wall2" type="CSGBox3D" parent="map/wall&floor/EastWall"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 1.5, -11)
+material_override = ExtResource("2_x3icv")
+use_collision = true
+size = Vector3(1, 4, 12)
+
+[node name="wall13" type="CSGBox3D" parent="map/wall&floor/EastWall"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.5, 1.5, -18)
+material_override = ExtResource("2_x3icv")
+use_collision = true
+size = Vector3(1, 4, 10)
+
+[node name="SouthWall" type="Node3D" parent="map/wall&floor" groups=["south_wall"]]
+script = ExtResource("4_vwwop")
+
+[node name="wall10" type="CSGBox3D" parent="map/wall&floor/SouthWall"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.5, 1.5, -12.5)
+material_override = ExtResource("2_x3icv")
+use_collision = true
+size = Vector3(11, 4, 1)
+
+[node name="wall11" type="CSGBox3D" parent="map/wall&floor/SouthWall"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 1.5, -16.5)
+material_override = ExtResource("2_x3icv")
+use_collision = true
+size = Vector3(8, 4, 1)
+
+[node name="wall3" type="CSGBox3D" parent="map/wall&floor/SouthWall"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 1.5, 5.5)
+material_override = ExtResource("2_x3icv")
+use_collision = true
+size = Vector3(1, 4, 10)
+
+[node name="WestWall" type="Node3D" parent="map/wall&floor" groups=["west_wall"]]
+script = ExtResource("4_vwwop")
+
+[node name="wall2" type="CSGBox3D" parent="map/wall&floor/WestWall"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, 1.5, 0)
 material_override = ExtResource("2_x3icv")
 use_collision = true
 size = Vector3(1, 4, 10)
 
-[node name="wall6" type="CSGBox3D" parent="map/wall&floor"]
+[node name="wall6" type="CSGBox3D" parent="map/wall&floor/WestWall"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5, 1.5, -15)
 material_override = ExtResource("2_x3icv")
 use_collision = true
 size = Vector3(1, 4, 4)
 
-[node name="wall13" type="CSGBox3D" parent="map/wall&floor"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.5, 1.5, -18)
-visible = false
-material_override = ExtResource("2_x3icv")
-use_collision = true
-size = Vector3(1, 4, 10)
-
-[node name="wall12" type="CSGBox3D" parent="map/wall&floor"]
+[node name="wall12" type="CSGBox3D" parent="map/wall&floor/WestWall"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5, 1.5, -21.5)
 material_override = ExtResource("2_x3icv")
 use_collision = true
 size = Vector3(1, 4, 3)
 
-[node name="wall10" type="CSGBox3D" parent="map/wall&floor"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.5, 1.5, -12.5)
-visible = false
+[node name="wall7" type="CSGBox3D" parent="map/wall&floor/WestWall"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -1.5, 1.5, -12.5)
 material_override = ExtResource("2_x3icv")
 use_collision = true
-size = Vector3(11, 4, 1)
+size = Vector3(15, 4, 1)
 
-[node name="wall11" type="CSGBox3D" parent="map/wall&floor"]
+[node name="NorthWall" type="Node3D" parent="map/wall&floor" groups=["north_wall"]]
+script = ExtResource("4_vwwop")
+
+[node name="wall11" type="CSGBox3D" parent="map/wall&floor/NorthWall"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.5, 1.5, -23.5)
 material_override = ExtResource("2_x3icv")
 use_collision = true
 size = Vector3(11, 4, 1)
 
-[node name="wall8" type="CSGBox3D" parent="map/wall&floor"]
+[node name="wall8" type="CSGBox3D" parent="map/wall&floor/NorthWall"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 1.5, -19.5)
 material_override = ExtResource("2_x3icv")
 use_collision = true
 size = Vector3(11, 4, 1)
 
-[node name="wall3" type="CSGBox3D" parent="map/wall&floor"]
-transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 1.5, 5.5)
-visible = false
-layers = 2
-material_override = ExtResource("2_x3icv")
-use_collision = true
-size = Vector3(1, 4, 10)
-
-[node name="wall4" type="CSGBox3D" parent="map/wall&floor"]
-transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -3.5, 1.5, -5.5)
-material_override = ExtResource("2_x3icv")
-use_collision = true
-size = Vector3(1, 4, 5)
-
-[node name="wall7" type="CSGBox3D" parent="map/wall&floor"]
-transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -1.5, 1.5, -13)
-material_override = ExtResource("2_x3icv")
-use_collision = true
-size = Vector3(14, 4, 1)
-
-[node name="wall5" type="CSGBox3D" parent="map/wall&floor"]
-transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 3, 1.5, -5.5)
+[node name="wall4" type="CSGBox3D" parent="map/wall&floor/NorthWall"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -3, 1.5, -5.5)
 material_override = ExtResource("2_x3icv")
 use_collision = true
 size = Vector3(1, 4, 4)
 
-[node name="wall9" type="CSGBox3D" parent="map/wall&floor"]
-transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 5, 1.5, -11.5)
-visible = false
+[node name="wall5" type="CSGBox3D" parent="map/wall&floor/NorthWall"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 3, 1.5, -5.5)
 material_override = ExtResource("2_x3icv")
 use_collision = true
-size = Vector3(11, 4, 8)
+size = Vector3(1, 4, 4)
 
 [node name="OmniLight3D" type="OmniLight3D" parent="map"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.48807, 0)
@@ -218,9 +232,12 @@ libraries = {
 }
 autoplay = "flicker"
 
+[node name="WorldEnvironment" type="WorldEnvironment" parent="map"]
+environment = SubResource("Environment_n8rq2")
+
 [node name="SubViewport" type="SubViewport" parent="."]
 handle_input_locally = false
-size = Vector2i(484, 272)
+size = Vector2i(1162, 653)
 
 [node name="player" parent="SubViewport" node_paths=PackedStringArray("camera_rig", "camera") instance=ExtResource("3_b20om")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
@@ -229,45 +246,59 @@ camera = NodePath("../camera_rig/Camera3D")
 
 [node name="visuals" parent="SubViewport/player" index="1" groups=["snap"]]
 
-[node name="female" parent="SubViewport/player/visuals" index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+[node name="GeneralSkeleton" parent="SubViewport/player/visuals/female/Armature" index="0"]
+bones/0/position = Vector3(0.0520792, 1.03188, 0.00927017)
+bones/0/rotation = Quaternion(-0.00846144, -0.0497429, -0.0292107, 0.998299)
+bones/1/rotation = Quaternion(0.0107298, 0.00378331, 0.015555, 0.999814)
+bones/2/rotation = Quaternion(0.0214503, 0.00757532, 0.0267685, 0.999383)
+bones/3/rotation = Quaternion(0.0214504, 0.00757529, 0.0267685, 0.999383)
+bones/4/rotation = Quaternion(-0.0905502, 0.000905087, 0.00621063, 0.995872)
+bones/5/rotation = Quaternion(0.0369367, 0.0101409, -0.0475179, 0.998136)
+bones/7/rotation = Quaternion(0.521594, -0.465763, -0.554666, -0.450944)
+bones/8/rotation = Quaternion(-0.129732, 0.800931, -0.537807, 0.229004)
+bones/9/rotation = Quaternion(0.0650851, 0.709642, -0.0640738, 0.698618)
+bones/10/rotation = Quaternion(-0.0621886, -0.481637, -0.219114, 0.846255)
+bones/15/rotation = Quaternion(0.13098, 0.0649138, 0.0615438, 0.987341)
+bones/16/rotation = Quaternion(0.0576453, 0.000283528, 0.00511852, 0.998324)
+bones/19/rotation = Quaternion(0.120582, 0.00713971, 0.0538866, 0.991214)
+bones/20/rotation = Quaternion(0.0915563, 0.000417251, -0.00495351, 0.995788)
+bones/23/rotation = Quaternion(0.177105, 0.0112422, 0.0334535, 0.983559)
+bones/24/rotation = Quaternion(0.0817264, 0.00280785, -0.00393479, 0.996643)
+bones/27/rotation = Quaternion(0.193931, -0.00694712, 0.0322558, 0.98046)
+bones/28/rotation = Quaternion(0.108827, 0.00750082, -0.0373236, 0.993332)
+bones/31/rotation = Quaternion(0.514019, 0.468933, 0.580018, -0.423632)
+bones/32/rotation = Quaternion(0.142289, 0.809338, -0.549722, -0.150103)
+bones/33/rotation = Quaternion(0.0525215, -0.708788, 0.0519845, 0.70154)
+bones/34/rotation = Quaternion(0.0431533, 0.581402, 0.178241, 0.792679)
+bones/39/rotation = Quaternion(0.118789, -0.0683122, -0.0984351, 0.985664)
+bones/40/rotation = Quaternion(0.0999625, 0.00382814, -0.0102913, 0.994931)
+bones/43/rotation = Quaternion(0.093564, -0.0126111, -0.0592294, 0.99377)
+bones/44/rotation = Quaternion(0.122431, 1.53553e-05, 0.00425434, 0.992468)
+bones/47/rotation = Quaternion(0.2172, 0.00306776, -0.0543028, 0.974611)
+bones/48/rotation = Quaternion(0.142691, -0.00146912, 0.0043459, 0.989757)
+bones/51/rotation = Quaternion(0.316329, 0.0346882, -0.0636089, 0.945879)
+bones/52/rotation = Quaternion(0.216396, -6.39424e-05, 0.0386596, 0.97554)
+bones/55/rotation = Quaternion(-0.0608342, 0.0214071, 0.996226, -0.0580984)
+bones/56/rotation = Quaternion(-0.00218485, 0.997278, -0.0737057, 0.000128891)
+bones/57/rotation = Quaternion(-0.0909596, 0.67276, -0.73244, -0.0515045)
+bones/60/rotation = Quaternion(0.0236021, 0.126704, 0.988723, -0.0762609)
+bones/61/rotation = Quaternion(0.00475991, 0.991777, -0.127883, 0.000968204)
+bones/62/rotation = Quaternion(0.0994725, 0.716729, -0.676752, 0.135685)
+bones/63/rotation = Quaternion(-0.0244404, 0.999613, -0.000821717, 0.0132867)
 
-[node name="Skeleton3D" parent="SubViewport/player/visuals/female/Armature" index="0"]
-bones/0/position = Vector3(0.279614, 2.50038, -95.1087)
-bones/0/rotation = Quaternion(-0.618466, -0.285911, 0.244711, 0.689834)
-bones/1/rotation = Quaternion(-0.0613479, 0.0523511, 0.0334728, 0.99618)
-bones/2/rotation = Quaternion(0.0181918, 0.0271045, 0.00246612, 0.999464)
-bones/3/rotation = Quaternion(0.0309098, 0.00380158, 0.0187991, 0.999338)
-bones/4/rotation = Quaternion(0.104915, 0.0677631, -0.0279855, 0.991775)
-bones/5/rotation = Quaternion(0.00991829, 0.17373, 0.0855013, 0.981025)
-bones/7/rotation = Quaternion(-0.420713, 0.504381, -0.558799, -0.506304)
-bones/8/rotation = Quaternion(0.364979, 0.102254, -0.818914, 0.430946)
-bones/9/rotation = Quaternion(4.16832e-08, -7.2289e-08, -0.260542, 0.965462)
-bones/10/rotation = Quaternion(-0.222724, 0.37587, 0.173462, 0.882625)
-bones/31/rotation = Quaternion(0.509861, 0.561436, -0.577684, 0.301849)
-bones/32/rotation = Quaternion(0.262605, -0.254271, 0.500685, 0.784665)
-bones/33/rotation = Quaternion(3.7836e-07, -4.14087e-07, 0.662289, 0.749249)
-bones/34/rotation = Quaternion(-0.184992, -0.388013, -0.34051, 0.836228)
-bones/55/rotation = Quaternion(-0.0874803, 0.163069, 0.980943, 0.0592207)
-bones/56/rotation = Quaternion(-0.330917, -0.0577687, -0.0154265, 0.941764)
-bones/57/rotation = Quaternion(0.588051, 0.0932885, 0.0715685, 0.800232)
-bones/58/rotation = Quaternion(0.345626, -1.78297e-08, -9.14438e-08, 0.938372)
-bones/60/rotation = Quaternion(0.081755, 0.308956, 0.932757, -0.166816)
-bones/61/rotation = Quaternion(-0.25653, -0.059637, 0.0392666, 0.963895)
-bones/62/rotation = Quaternion(0.453286, -0.0545823, -0.0579654, 0.887802)
-bones/63/rotation = Quaternion(0.336735, -0.00079045, -0.000286349, 0.941599)
+[node name="Beta_Joints" parent="SubViewport/player/visuals/female/Armature/GeneralSkeleton" index="0"]
+layers = 2
 
-[node name="Beta_Joints" parent="SubViewport/player/visuals/female/Armature/Skeleton3D" index="0"]
-layers = 3
+[node name="Beta_Surface" parent="SubViewport/player/visuals/female/Armature/GeneralSkeleton" index="1"]
+layers = 2
 
-[node name="Beta_Surface" parent="SubViewport/player/visuals/female/Armature/Skeleton3D" index="1"]
-layers = 3
+[node name="BoneAttachment3D" type="BoneAttachment3D" parent="SubViewport/player/visuals/female/Armature/GeneralSkeleton" index="2"]
+transform = Transform3D(0.996554, -0.0308136, -0.0770141, 0.0274122, 0.998618, -0.0448402, 0.0782894, 0.0425745, 0.996021, 0.0619187, 1.23247, -0.00505569)
+bone_name = "Chest"
+bone_idx = 2
 
-[node name="AnimationPlayer" parent="SubViewport/player/visuals/female" index="1"]
-autoplay = "idle"
-
-[node name="OmniLight3D" type="OmniLight3D" parent="SubViewport/player/visuals" index="1"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, -0.5)
+[node name="OmniLight3D" type="OmniLight3D" parent="SubViewport/player/visuals/female/Armature/GeneralSkeleton/BoneAttachment3D" groups=["flash_light"]]
+transform = Transform3D(-0.996772, 0.0287838, -0.0749524, 0.0323527, 0.998378, -0.0468446, 0.0734824, -0.0491183, -0.996086, -0.00599794, 0.592128, 0.476763)
 visible = false
 layers = 2
 light_energy = 0.2
@@ -275,14 +306,16 @@ light_cull_mask = 4293918722
 omni_range = 1.0
 script = ExtResource("4_8vwj6")
 
-[node name="SpotLight3D" type="SpotLight3D" parent="SubViewport/player/visuals" index="2"]
-transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 1.9, -0.2)
+[node name="AnimationTree" parent="SubViewport/player/visuals" index="1"]
+parameters/aim_walk/blend_position = Vector2(-0.482292, -0.29199)
+parameters/crouch_walk/TimeScale/scale = 0.7
+
+[node name="SpotLight3D" type="SpotLight3D" parent="SubViewport/player/visuals" index="2" groups=["flash_light"]]
+transform = Transform3D(0.999514, 0.0103237, -0.0294318, 0.00540096, 0.872089, 0.489318, 0.0307187, -0.489239, 0.871609, -0.00473945, 1.90237, -0.189785)
 visible = false
+light_cull_mask = 4294967293
 spot_angle = 32.9
 script = ExtResource("4_8vwj6")
-
-[node name="AnimationTree" parent="SubViewport/player/visuals" index="3"]
-parameters/aim_walk/blend_position = Vector2(-0.482292, -0.29199)
 
 [node name="camera_rig" type="Node3D" parent="SubViewport" node_paths=PackedStringArray("player")]
 transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0, 1.7, 0)
@@ -293,11 +326,12 @@ player = NodePath("../player")
 transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707106, 0, 6, 5)
 projection = 1
 current = true
-size = 5.355
+size = 15.0
+far = 200.0
 script = ExtResource("4_cgcpi")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="SubViewport/camera_rig/Camera3D"]
-transform = Transform3D(1, 0, 0, 0, -5.96046e-08, -1, 0, 1, 0, 9.53674e-07, -0.255379, -0.976128)
+transform = Transform3D(1, 0, 0, 0, -5.96046e-08, -1, 0, 1, 2.98023e-08, 9.53674e-07, -0.255379, -0.976129)
 mesh = SubResource("PlaneMesh_lkgup")
 skeleton = NodePath("../..")
 
@@ -311,27 +345,51 @@ offset_bottom = 319.68
 script = ExtResource("6_7ti74")
 viewport = NodePath("../SubViewport")
 
-[node name="Label" type="Label" parent="Display"]
+[node name="Sprite2D" type="Sprite2D" parent="Display"]
+z_index = -1
+texture_filter = 2
+material = SubResource("ShaderMaterial_sdyh0")
+scale = Vector2(3.265, 3.265)
+texture = SubResource("ViewportTexture_72lo0")
+centered = false
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -960.0
+offset_top = -1080.0
+offset_right = 960.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Label" type="Label" parent="Control"]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -83.0
+offset_left = -510.0
 offset_top = -34.0
-offset_right = 83.0
+offset_right = 510.0
 grow_horizontal = 2
 grow_vertical = 0
-text = "[WASD]-移动  [SHIFT]-冲刺  [空格]-开关手电  [鼠标右键]-瞄准"
+text = "[WASD]-移动  [Q/E]-转动视角  [鼠标滑轮]-缩放视角  [SHIFT]-冲刺  [空格]-开关手电  [C]-蹲下  [鼠标右键]-瞄准"
 label_settings = SubResource("LabelSettings_lllcc")
 
-[node name="Sprite2D" type="Sprite2D" parent="Display"]
-z_index = -1
-texture_filter = 2
-material = SubResource("ShaderMaterial_sdyh0")
-texture = SubResource("ViewportTexture_72lo0")
-centered = false
+[node name="WallHideSystem" parent="." node_paths=PackedStringArray("cam_rig") instance=ExtResource("13_qhwyf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -5, 0)
+cam_rig = NodePath("../SubViewport/camera_rig")
+
+[node name="ray" parent="WallHideSystem" index="0"]
+script = null
+
+[node name="CollisionShape3D" parent="WallHideSystem/ray" index="0"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
 
 [editable path="SubViewport/player"]
-[editable path="SubViewport/player/visuals/female"]
+[editable path="WallHideSystem"]
