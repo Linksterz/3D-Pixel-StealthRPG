@@ -14,5 +14,4 @@ func _process(delta):
 	rotation.y = lerpf(rotation.y, _target_orbit, 1.0 - 2.0 ** (-4.0 * delta * orbit_speed))
 	if absf(rotation.y - _target_orbit) < 0.02:
 		rotation.y = _target_orbit
-		
-	print(rad_to_deg(rotation.y))
+		#print(rad_to_deg(_target_orbit))

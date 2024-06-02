@@ -1,16 +1,18 @@
 extends Node3D
 
 
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass # Replace with function body.
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
-
+# Toggle flash light
 func _input(event):
-	if event.is_action_pressed("crouch"):
-		print("ass")
+	if event.is_action_pressed("light"):
+		get_tree().call_group("flash_light","toggle")
+		
+	if event.is_action_pressed("zoom_in"):
+		$Display.zoom += 0.1
+	if event.is_action_pressed("zoom_out"):
+		$Display.zoom -= 0.1
+
+# Close game
+func _unhandled_input(event):
+	if event is InputEventKey:
+		if event.pressed and event.keycode == KEY_ESCAPE:
+			get_tree().quit()
